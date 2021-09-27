@@ -1,4 +1,4 @@
-# crud-mhs using clean architecture
+# crud-mhs Golang using clean architecture
 
 layer delivery
 
