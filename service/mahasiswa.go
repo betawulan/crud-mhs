@@ -21,10 +21,10 @@ func (m mahasiswaService) Store(ctx context.Context, mahasiswa entity.Mahasiswa)
 	return mahasiswa, nil
 }
 
-func (m mahasiswaService) Fetch(ctx context.Context) ([]entity.Mahasiswa, error) {
-	mahasiswas, err := m.mahasiswaRepo.Fetch(ctx)
+func (m mahasiswaService) Fetch(ctx context.Context, filter entity.FilterMahasiswa) ([]entity.Mahasiswa, error) {
+	mahasiswas, err := m.mahasiswaRepo.Fetch(ctx, filter)
 	if err != nil {
-		return nil, err
+		return make([]entity.Mahasiswa, 0), err
 	}
 
 	return mahasiswas, nil

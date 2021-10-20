@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/betawulan/crud-mhs/entity"
 )
 
@@ -29,10 +30,35 @@ func (m mahasiswaRepo) Store(ctx context.Context, mahasiswa entity.Mahasiswa) (e
 	return mahasiswa, nil
 }
 
-func (m mahasiswaRepo) Fetch(ctx context.Context) ([]entity.Mahasiswa, error) {
-	query := "SELECT id, name, email FROM mahasiswa"
+func (m mahasiswaRepo) Fetch(ctx context.Context, filter entity.FilterMahasiswa) ([]entity.Mahasiswa, error) {
+	order := "created_at desc"
+	if filter.Order == "asc" {
+		order = "created_at asc"
+	}
 
-	rows, err := m.db.QueryContext(ctx, query)
+	qSelect := sq.Select("id", "name", "email").From("mahasiswa").OrderBy(order)
+	if filter.Limit != 0 {
+		qSelect = qSelect.Limit(filter.Limit)
+	}
+
+	if filter.Email != "" {
+		qSelect = qSelect.Where(sq.Eq{"email": filter.Email})
+	}
+
+	if filter.Name != "" {
+		qSelect = qSelect.Where(sq.Eq{"name": filter.Name})
+	}
+
+	if filter.Page != 0 {
+		qSelect = qSelect.Offset(uint64(filter.Page))
+	}
+
+	query, args, err := qSelect.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
