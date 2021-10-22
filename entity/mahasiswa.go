@@ -4,8 +4,8 @@ import "time"
 
 type Mahasiswa struct {
 	ID        int64     `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
+	Name      string    `json:"name" validate:"required"`
+	Email     string    `json:"email" validate:"required"`
 	CreatedAt time.Time `json:"-"`
 }
 

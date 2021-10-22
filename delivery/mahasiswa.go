@@ -6,12 +6,14 @@ import (
 
 	"github.com/betawulan/crud-mhs/entity"
 	"github.com/betawulan/crud-mhs/service"
+	"github.com/go-playground/validator/v10"
 
 	"github.com/labstack/echo/v4"
 )
 
 type mahasiswaDelivery struct {
 	mahasiswaService service.MahasiswaService
+	validate         *validator.Validate
 }
 
 func (m mahasiswaDelivery) store(c echo.Context) error {
@@ -22,6 +24,11 @@ func (m mahasiswaDelivery) store(c echo.Context) error {
 		err = c.JSON(http.StatusBadRequest, err)
 
 		return err
+	}
+
+	err = m.validate.Struct(mahasiswa)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
 	mahasiswa, err = m.mahasiswaService.Store(c.Request().Context(), mahasiswa)
@@ -78,8 +85,11 @@ func (m mahasiswaDelivery) fetch(c echo.Context) error {
 // }
 
 func RegisterMahasiswaRoute(mahasiswaService service.MahasiswaService, e *echo.Echo) {
+	validate := validator.New()
+
 	handler := mahasiswaDelivery{
 		mahasiswaService: mahasiswaService,
+		validate:         validate,
 	}
 
 	e.POST("/mahasiswa", handler.store)

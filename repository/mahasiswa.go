@@ -15,9 +15,20 @@ type mahasiswaRepo struct {
 
 func (m mahasiswaRepo) Store(ctx context.Context, mahasiswa entity.Mahasiswa) (entity.Mahasiswa, error) {
 	mahasiswa.CreatedAt = time.Now()
-	query := "INSERT INTO mahasiswa (name, email, created_at) VALUES(?, ?, ?)"
 
-	res, err := m.db.ExecContext(ctx, query, mahasiswa.Name, mahasiswa.Email, mahasiswa.CreatedAt)
+	query, args, err := sq.Insert("mahasiswa").
+		Columns("name",
+			"email",
+			"created_at").
+		Values(mahasiswa.Name,
+			mahasiswa.Email,
+			mahasiswa.CreatedAt).
+		ToSql()
+	if err != nil {
+		return entity.Mahasiswa{}, nil
+	}
+
+	res, err := m.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return entity.Mahasiswa{}, err
 	}
